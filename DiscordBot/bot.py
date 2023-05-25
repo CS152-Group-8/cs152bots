@@ -182,8 +182,9 @@ class ModBot(discord.Client):
                 f"Forwarded message:\n{message.author.name}:"
                 f" {self.clean_text(message.content)}"
             )
-            scores = self.eval_text(message.content)
-            await mod_channel.send(self.code_format(scores))
+            # TODO: uncomment for milestone 3
+            # scores = self.eval_text(message.content)
+            # await mod_channel.send(self.code_format(scores))
 
         # Handle messages sent in the "group-#-mod" channel
         # Very similar to the handle_dm() function for handling reports
@@ -273,8 +274,9 @@ class ModBot(discord.Client):
                 f" {self.clean_text(after.content)}"
             )
         )
-        scores = self.eval_text(after.content)
-        await mod_channel.send(self.code_format(scores))
+        # TODO: uncomment for milestone 3
+        # scores = self.eval_text(after.content)
+        # await mod_channel.send(self.code_format(scores))
 
     def list_all_reports(self) -> [str]:
         """
