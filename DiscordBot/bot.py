@@ -176,13 +176,14 @@ class ModBot(discord.Client):
     async def handle_channel_message(self, message):
         # Handle messages sent in the "group-#" channel
         if message.channel.name == f"group-{self.group_num}":
-            # Forward the message to the mod channel
-            mod_channel = self.mod_channels[message.guild.id]
-            await mod_channel.send(
-                f"Forwarded message:\n{message.author.name}:"
-                f" {self.clean_text(message.content)}"
-            )
+            pass
             # TODO: uncomment for milestone 3
+            # # Forward the message to the mod channel
+            # mod_channel = self.mod_channels[message.guild.id]
+            # await mod_channel.send(
+            #     f"Forwarded message:\n{message.author.name}:"
+            #     f" {self.clean_text(message.content)}"
+            # )
             # scores = self.eval_text(message.content)
             # await mod_channel.send(self.code_format(scores))
 
@@ -265,16 +266,16 @@ class ModBot(discord.Client):
         if not after.channel.name == f"group-{self.group_num}":
             return
 
-        # Forward the message to the mod channel
-        mod_channel = self.mod_channels[after.guild.id]
-        await mod_channel.send(
-            self.clean_text(
-                f"Forwarded edited message by {after.author.name}:\nBefore:"
-                f" {self.clean_text(before.content) if before else 'message not cached'}\nAfter:"
-                f" {self.clean_text(after.content)}"
-            )
-        )
         # TODO: uncomment for milestone 3
+        # Forward the message to the mod channel
+        # mod_channel = self.mod_channels[after.guild.id]
+        # await mod_channel.send(
+        #     self.clean_text(
+        #         f"Forwarded edited message by {after.author.name}:\nBefore:"
+        #         f" {self.clean_text(before.content) if before else 'message not cached'}\nAfter:"
+        #         f" {self.clean_text(after.content)}"
+        #     )
+        # )
         # scores = self.eval_text(after.content)
         # await mod_channel.send(self.code_format(scores))
 
