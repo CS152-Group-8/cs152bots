@@ -145,8 +145,15 @@ class Report:
             # save the message for later
             self.data.message = message
 
+            if message.attachments:
+                return ReportStartMessage.MESSAGE_IDENTIFIED_ATTACHMENTS.format(
+                    author=message.author.name,
+                    content=message.content,
+                    num_attachments=len(message.attachments),
+                )
             return ReportStartMessage.MESSAGE_IDENTIFIED.format(
-                author=message.author.name, content=message.content
+                author=message.author.name,
+                content=message.content,
             )
 
         if self.state == State.MESSAGE_IDENTIFIED:
