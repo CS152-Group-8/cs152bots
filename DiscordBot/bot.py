@@ -8,8 +8,8 @@ from typing import Union
 
 import discord
 import emoji
-from report import Report
 from moderate import Moderate
+from report import Report
 from unidecode import unidecode
 
 # Set up logging to the console
@@ -38,8 +38,10 @@ class ModBot(discord.Client):
         self.group_num = None
         self.mod_channels = {}  # Map from guild to the mod channel id for that guild
         self.reports = {}  # Map from user IDs to the state of their report
-        self.moderating = None # Either None or the Moderate() instance that is currently running
-        self.open_reports = [] # List of all open reports
+        self.moderating = (
+            None  # Either None or the Moderate() instance that is currently running
+        )
+        self.open_reports = []  # List of all open reports
 
     async def on_ready(self):
         print(f"{self.user.name} has connected to Discord! It is these guilds:")
@@ -121,8 +123,14 @@ class ModBot(discord.Client):
     async def handle_dm(self, message):
         # Handle a help message
         if message.content == Report.HELP_KEYWORD:
-            reply = f"Use the `{Report.START_KEYWORD}` command to begin the reporting process.\n"
-            reply += f"Use the `{Report.CANCEL_KEYWORD}` command to cancel the report process.\n"
+            reply = (
+                f"Use the `{Report.START_KEYWORD}` command to begin the reporting"
+                " process.\n"
+            )
+            reply += (
+                f"Use the `{Report.CANCEL_KEYWORD}` command to cancel the report"
+                " process.\n"
+            )
             await message.channel.send(reply)
             return
 
@@ -149,9 +157,10 @@ class ModBot(discord.Client):
         for r in responses:
             sent_message = await message.channel.send(r)
             # if the report class returned a message with reactions, add those reactions to the message
-            emojis = emoji.emoji_list(r)
-            for e in emojis:
-                await sent_message.add_reaction(e["emoji"])
+            if self.reports[author_id].state in Report.REACT_STAGES:
+                emojis = emoji.emoji_list(r)
+                for e in emojis:
+                    await sent_message.add_reaction(e["emoji"])
 
         # If the report is complete or cancelled, remove it from our map
         if self.reports[author_id].report_complete():
@@ -160,7 +169,6 @@ class ModBot(discord.Client):
     async def handle_channel_message(self, message):
         # Handle messages sent in the "group-#" channel
         if message.channel.name == f"group-{self.group_num}":
-
             # Forward the message to the mod channel
             mod_channel = self.mod_channels[message.guild.id]
             await mod_channel.send(
@@ -169,18 +177,23 @@ class ModBot(discord.Client):
             )
             scores = self.eval_text(message.content)
             await mod_channel.send(self.code_format(scores))
-        
+
         # Handle messages sent in the "group-#-mod" channel
         # Very similar to the handle_dm() function for handling reports
         elif message.channel.name == f"group-{self.group_num}-mod":
-
             # Handle a help message
             if message.content == Moderate.HELP_KEYWORD:
-                reply = f"Use the `{Moderate.LIST_KEYWORD}` command to list all outstanding reports.\n"
-                reply += f"Use the `{Moderate.CANCEL_KEYWORD}` command to cancel the moderation session.\n"
+                reply = (
+                    f"Use the `{Moderate.LIST_KEYWORD}` command to list all outstanding"
+                    " reports.\n"
+                )
+                reply += (
+                    f"Use the `{Moderate.CANCEL_KEYWORD}` command to cancel the"
+                    " moderation session.\n"
+                )
                 await message.channel.send(reply)
                 return
-            
+
             # List all outstanding reports
             if message.content == Moderate.LIST_KEYWORD:
                 for r in self.list_all_reports():
@@ -260,10 +273,14 @@ class ModBot(discord.Client):
         """
         if len(self.open_reports) == 0:
             return ["No open reports right now!"]
-        response = [f"`{'Report ID':30} {'Priority':10} {'Reported by':20} {'Reported against':25}`"]
+        response = [
+            f"`{'Report ID':30} {'Priority':10} {'Reported by':20} {'Reported against':25}`"
+        ]
         self.open_reports.sort(key=lambda x: x.raw_priority, reverse=True)
         for r in self.open_reports:
-            response.append(f"`{str(r.id):30} {str(r.raw_priority):10} {str(r.reporter.name):20} {str(r.message.author.name):25}`")
+            response.append(
+                f"`{str(r.id):30} {str(r.raw_priority):10} {str(r.reporter.name):20} {str(r.message.author.name):25}`"
+            )
         return response
 
     def clean_text(self, text: str) -> str:
@@ -331,9 +348,10 @@ class ModBot(discord.Client):
         for r in responses:
             sent_message = await channel.send(r)
             # if the report class returned a message with reactions, add those reactions to the message
-            emojis = emoji.emoji_list(r)
-            for e in emojis:
-                await sent_message.add_reaction(e["emoji"])
+            if self.reports[reactor_id].state in Report.REACT_STAGES:
+                emojis = emoji.emoji_list(r)
+                for e in emojis:
+                    await sent_message.add_reaction(e["emoji"])
 
         # If the report is complete or cancelled, remove it from our map
         if self.reports[reactor_id].report_complete():

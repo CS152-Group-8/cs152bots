@@ -310,8 +310,7 @@ class Report:
                 self.state = State.REPORT_COMPLETE
                 return GenericMessage.REPORT_COMPLETE
             elif message.content.lower() in self.NO_KEYWORDS:
-                # TODO: what do we do if they say no...?
-                return "****TODO****???" + GenericMessage.CANCELED
+                return GenericMessage.CANCELED
             else:
                 return GenericMessage.INVALID_YES_NO
 
