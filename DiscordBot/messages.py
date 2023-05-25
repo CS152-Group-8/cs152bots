@@ -120,9 +120,9 @@ class ReportDetailsMessage:
         " following helplines as they will be able to provide you with immediate"
         " support and resources:\n- Emergency: 911\n- Self-Harm Hotline: 1-800-DONT-CUT"
         " (1-800-366-8288)\n- Crisis Text Line: Text 'HOME' to 741741 or"
-        " https://connect.crisistextline.org/chat\n- National Suicide Prevention"
+        " <https://connect.crisistextline.org/chat>\n- National Suicide Prevention"
         " Lifeline: 1-800-273-TALK (8255) or"
-        " https://suicidepreventionlifeline.org/chat/"
+        " <https://suicidepreventionlifeline.org/chat/>"
     )
     ADDITIONAL_INFO = (
         "Would you like to provide any additional information? Please type `yes` or"
