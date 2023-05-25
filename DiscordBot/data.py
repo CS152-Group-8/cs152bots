@@ -3,40 +3,34 @@ import cuid
 
 
 class ReportData:
-    SUMMARY = """
-Message:
-    Author: {offender}
-    Content: {content}
-    Attachments: {attachments}
-
-Report Details:
-    Reason: {reason}
-    Abuse Type: {abuse_type}
-    Abuse Description: {abuse_description}
-    Unwanted Requests: {unwanted_requests}
-    Multiple Requests: {multiple_requests}
-    Approximate Requests: {approximate_requests}
-    Complied with Requests: {complied_with_requests}
-
-Additional Information:
-    Minor Participation: {minor_participation}
-    Contained you or the person on behalf of whom this report is being filed: {contain_yourself}
-    Encouraged self-harm: {encourage_self_harm}
-    Additional information provided: {additional_info}
+    SUMMARY = """## Message:
+- Author: {offender}
+- Content: {content}
+- Attachments: {attachments}
+## Report Details:
+- Reason: {reason}
+- Abuse Type: {abuse_type}
+- Abuse Description: {abuse_description}
+- Unwanted Requests: {unwanted_requests}
+- Multiple Requests: {multiple_requests}
+- Approximate Requests: {approximate_requests}
+- Complied with Requests: {complied_with_requests}
+## Additional Information:
+- Minor Participation: {minor_participation}
+- Contained you or the person on behalf of whom this report is being filed: {contain_yourself}
+- Encouraged self-harm: {encourage_self_harm}
+- Additional information provided: {additional_info}
 """
 
-    MODERATOR_NOTES = """
-Moderator Notes:
-    Report ID: {id}
+    MODERATOR_NOTES = """## Moderator Notes:
+- Report ID: {id}
+- Priority: {priority}
 
-    Priority: {priority}
-    Created at: {date} (UTC)
-    Completed at: {completed_at} (UTC)
-
-    Created by: {reporter}
-    On behalf of: {on_behalf_of}
-    
-    Reported User Blocked: {block_user}
+- Created by: {reporter}
+ - Created at: {date} (UTC)
+ - Completed at: {completed_at} (UTC)
+- On behalf of: {on_behalf_of}
+- Reported User Blocked: {block_user}
 """
 
     def __init__(self):
@@ -122,7 +116,7 @@ Moderator Notes:
         return (
             "New user report created. Please review the following report and take"
             " necessary action.\n"
-            + "```"
+            + ">>> "
             + ReportData.MODERATOR_NOTES.format(
                 id=self.id,
                 priority=self.priority,
@@ -133,7 +127,6 @@ Moderator Notes:
                 block_user=self._human_readable(self.blocked_user),
             )
             + self.summary
-            + "```"
         )
 
     @property
@@ -141,7 +134,7 @@ Moderator Notes:
         """
         Generate a summary of the report for the user.
         """
-        return "```" + self.summary + "```"
+        return ">>> " + self.summary
 
     def _human_readable(self, value: str) -> str:
         """
