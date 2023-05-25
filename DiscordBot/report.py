@@ -147,7 +147,7 @@ class Report:
 
             if message.attachments:
                 # str(a) gets the url of the attachment
-                self.data.attachments = ', '.join([str(a) for a in message.attachments])
+                self.data.attachments = "\n" + '\n'.join([" - " + str(a) + "." for a in message.attachments])
                 attachments = '\n'.join(["- " + str(a) + "." for a in message.attachments])
                 return ReportStartMessage.MESSAGE_IDENTIFIED_ATTACHMENTS.format(
                     author=message.author.name,
