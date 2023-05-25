@@ -7,6 +7,7 @@ class ReportData:
 Message:
     Author: {offender}
     Content: {content}
+    Attachments: {attachments}
 
 Report Details:
     Reason: {reason}
@@ -44,6 +45,7 @@ Moderator Notes:
         self.report_completed_at = None
         self.reporter = None
         self.message = None
+        self.attachments = None
         self.on_behalf_of = None
         self.reason = None
         self.abuse_type = None
@@ -98,6 +100,7 @@ Moderator Notes:
         return ReportData.SUMMARY.format(
             offender=self.message.author.name,
             content=self.message.content,
+            attachments=self._human_readable(self.attachments),
             reason=self.reason,
             abuse_type=self.abuse_type,
             abuse_description=self.abuse_description,

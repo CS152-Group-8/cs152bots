@@ -54,7 +54,7 @@ class ReportStartMessage:
     )
     MESSAGE_IDENTIFIED_ATTACHMENTS = (
         "I found this message:\n```{author}: {content}```*Includes {num_attachments}"
-        " attachment(s).*\n\nIs this the message you want to report? Please type `yes`"
+        " attachment(s).*\n{attachments}\n\nIs this the message you want to report? Please type `yes`"
         " or `no`."
     )
 
