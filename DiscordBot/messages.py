@@ -21,6 +21,11 @@ class GenericMessage:
         "I'm sorry, I didn't understand that number. Please try again or type `cancel`"
         " to cancel the report."
     )
+    BANNED_USER = "You are currently banned."
+    BANNED_OTHER_USER = (
+        "That user is already banned. If this was a mistake, please try again or type"
+        " `cancel` to cancel the report."
+    )
 
 
 class ReportStartMessage:
@@ -54,8 +59,8 @@ class ReportStartMessage:
     )
     MESSAGE_IDENTIFIED_ATTACHMENTS = (
         "I found this message:\n```{author}: {content}```*Includes {num_attachments}"
-        " attachment(s).*\n{attachments}\n\nIs this the message you want to report? Please type `yes`"
-        " or `no`."
+        " attachment(s).*\n{attachments}\n\nIs this the message you want to report?"
+        " Please type `yes` or `no`."
     )
 
 

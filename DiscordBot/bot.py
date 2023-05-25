@@ -8,6 +8,7 @@ from typing import Union
 
 import discord
 import emoji
+from messages import GenericMessage
 from moderate import Moderate
 from report import Report
 from unidecode import unidecode
@@ -42,6 +43,7 @@ class ModBot(discord.Client):
             None  # Either None or the Moderate() instance that is currently running
         )
         self.open_reports = []  # List of all open reports
+        self.banned_users = set()  # Permanently kicked user ids from moderator flow
 
     async def on_ready(self):
         print(f"{self.user.name} has connected to Discord! It is these guilds:")
@@ -81,6 +83,11 @@ class ModBot(discord.Client):
         """
         # Ignore messages from the bot
         if message.author.id == self.user.id:
+            return
+
+        # Ignore banned users messages:
+        if message.author.id in self.banned_users:
+            await message.channel.send(GenericMessage.BANNED_USER)
             return
 
         # Check if this message was sent in a server ("guild") or if it's a DM
@@ -227,6 +234,9 @@ class ModBot(discord.Client):
 
             # Okay cool! And we can turn this in a little late bc it's a made-up deadline for our own group to make the video.
             # I'll also come help work in the morning.
+
+            # *** NEEDS TO HANDLE BANNING USERS AND ADDING THEM TO THE BANNED LIST (self.banned_users) ***
+            # self.banned_users.add(message.author.id)
 
             # Handle starting a new moderation session (if you type something like "handle cli1grln20001rvwuslj4wo74")
             if self.moderating == None and message.content.startswith(Moderate.START_KEYWORD):

@@ -140,6 +140,9 @@ class Report:
             except discord.errors.NotFound:
                 return ReportStartMessage.MESSAGE_DELETED
 
+            if message.author.id in self.client.banned_users:
+                return GenericMessage.BANNED_OTHER_USER
+
             self.state = State.MESSAGE_IDENTIFIED
 
             # save the message for later
