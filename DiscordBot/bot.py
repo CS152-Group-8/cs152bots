@@ -8,8 +8,8 @@ from typing import Union
 
 import discord
 import emoji
-from report import Report
 from moderate import Moderate
+from report import Report
 from unidecode import unidecode
 
 # Set up logging to the console
@@ -348,10 +348,11 @@ class ModBot(discord.Client):
         # We only care about adding reactions
         if payload.event_type != "REACTION_ADD":
             return
-        print(self.moderating)
+            
         # Ignore reactions that aren't part of a reporting flow or part of the moderating flow
         if reactor_id not in self.reports and self.moderating == None:
             return
+
         # Get the message that the reaction was added in
       
         fetched_message = await channel.fetch_message(payload.message_id)
@@ -381,7 +382,7 @@ class ModBot(discord.Client):
             self.reports.pop(reactor_id)
         
         # If moderation is complete
-        if self.moderate.moderation_complete():
+        if self.moderating and self.moderating.moderation_complete():
             self.moderating = None
 
 
