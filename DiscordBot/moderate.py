@@ -98,7 +98,7 @@ class Moderate:
                 if other_reports:
                     response.append(
                         ModerateMessage.ADDITIONAL_DATA_COLLECTION.format(
-                            reports="\n" + "\n".join([" - " + r for r in other_reports])
+                            reports="\n" + "\n".join(["- " + r for r in other_reports])
                         )
                     )
                 else:
@@ -118,7 +118,7 @@ class Moderate:
                 if other_reports:
                     self.state = State.AWAITING_ADVERSARIAL_REPORTING
                     return ModerateMessage.ADVERSARIAL_REPORTING.format(
-                        reports="\n" + "\n".join([" - " + r for r in other_reports])
+                        reports="\n" + "\n".join(["- " + r for r in other_reports])
                     )
 
                 self.state = State.MODERATE_COMPLETE
