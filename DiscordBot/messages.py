@@ -86,9 +86,6 @@ class ReportDetailsMessage:
         " with the corresponding emoji.\n1️⃣ - Harassment or offensive content \n2️⃣ - Spam"
         " \n3️⃣ - Immediate danger\n4️⃣ - Other"
     )
-    MODERATOR_ABUSE_TYPE = (
-        "Is this message a sextortion violation? Please type `yes` or `no`."
-    )
     ABUSE_TYPE = (
         "What type of abuse are you reporting? React to this message with the"
         " corresponding emoji.\n1️⃣ - Sexually explicit harassment\n2️⃣ - Encouraging"
@@ -153,29 +150,41 @@ class ReportDetailsMessage:
 
 
 class ModerateMessage:
+    START = "Moderating flow has started."
     IS_SEXTORTION_VIOLATION = (
         "Does this message fall into the category of non-consenual intimate imagery or"
-        " sextortion as outlined in our community guidelines?"
+        " sextortion as outlined in our community guidelines? Answering `yes` will"
+        " permanently ban the user from our platform."
     )
     BANNED_USER = "`{author}` has been banned."
-    ADDITIONAL_DATA_COLLECTION = "Here are previous reports filed against this user"
-    HIGHER_LEVEL_COMPLETE = (
-        "After reviewing these reports, please type `yes` or `no` to confirm that you"
-        " would like to transfer this report to a higher-level moderator that can take"
-        " further action."
+    ADDITIONAL_DATA_COLLECTION_NO_REPORTS = (
+        "There are no previous reports filed against this user. Please type `yes` or"
+        " `no` to confirm that you would like to transfer this report to a higher-level"
+        " moderator that may take further action."
     )
 
-    ADVERSARIAL_REPORTING = "Here are previous reports filed by this user"
+    ADDITIONAL_DATA_COLLECTION = (
+        "Here are previous reports filed against this user:\n{reports}\nAfter reviewing"
+        " these reports, please type `yes` or `no` to confirm that you would like to"
+        " transfer this report to a higher-level moderator that may take further"
+        " action."
+    )
+
+    NO_ESCALATE = (
+        "No further action is required on your part. This report will stay on file."
+    )
+    YES_ESCALATE = (
+        "Thank you for reviewing this report. This activity and associated reports will"
+        " be sent to another team for further investigation."
+    )
+
+    ADVERSARIAL_REPORTING = "Here are previous reports filed by this user:\n{reports}"
     AWAITING_ADVERSARIAL_REPORTING = (
         "After reviewing these reports, please type `yes` or `no` to confirm that this"
         " user is participating in adversarial reporting."
     )
 
     TEMP_BANNED_USER = "`{author}` has been temporarily banned for {day} day(s)."
-    ADVERSARIAL_REPORTING_YES_COMPLETE = (
-        "Thank you for reviewing this report. This activity and associated reports will"
-        " be forwarded to another team for further investigation."
-    )
 
     ADVERSARIAL_REPORTING_NO_COMPLETE = (
         "Thank you for reviewing this report. No further action is required on your"

@@ -8,7 +8,7 @@ from typing import Union
 
 import discord
 import emoji
-from messages import GenericMessage
+from messages import GenericMessage, ModerateMessage
 from moderate import Moderate
 from report import Report
 from unidecode import unidecode
@@ -209,15 +209,12 @@ class ModBot(discord.Client):
                     sent_message = await message.channel.send(r)
                 return
 
-            author_id = message.author.id
             responses = []
-
             if self.moderating == None and message.content.startswith(
                 Moderate.START_KEYWORD
             ):
                 self.moderating = Moderate(self)
-                reply = f"I'm moderating right now.\n"
-                await message.channel.send(reply)
+                await message.channel.send(ModerateMessage.START)
 
             # Let the moderate class handle this message; forward all the messages it returns to uss
             responses = await self.moderating.handle_message(message)
@@ -234,58 +231,8 @@ class ModBot(discord.Client):
                     await sent_message.add_reaction(e["emoji"])
 
             # If the report/moderation is complete or cancelled, remove it from our map
-            if self.moderating.moderation_complete():
+            if self.moderating and self.moderating.moderation_complete():
                 self.moderating = None
-
-            """
-            # @nandini
-            # Line 175 starts our section: reading messages in group-8-mod. The other parts read messages in group-8
-            # which is the actual chat. So line 175 and onwards is how we respond when people send things in the
-            # moderator chat. (There are only moderators in the moderator chat.)
-            # I added the "list" command that lists all open reports along with their IDs. That's under the comment
-            # "#List all outstanding reports" and you don't need to adjust any of that part. It's like four lines.
-            
-            # Here's what we were thinking of adding next, in summary:
-            # If the user types something like "handle cli1grln20001rvwuslj4wo74", it starts a moderation session for that
-            # specific report with the ID cli1grln20001rvwuslj4wo74. (If that ID exists.) You make a new moderation session
-            # by doing self.moderating = Moderate(self). That's part of the commented-out code below.
-            # self.moderating starts as None and once you type "handle something-something" it should set it to a new
-            # Moderate() instance. That's the type of that.
-
-            # The code currently commented out is the stuff that I copied from handle_dm but that is still not fully
-            # adapted to work for moderator view. Here's what it would be great for you to do!
-            # Number 1: Set up the moderate.py file with self.moderating.handle_message() and self.moderating.moderation_complete()
-            # Number 2: Also make the moderate.py file work with the flow from https://app.diagrams.net/#G1zM8zjd6p2kEtkVCQVHSDsE0qCBl3Rq0m
-            #           moderate.py should be a lot simpler than report.py because it's a much smaller flow and we also don't use
-            #           reactions at any point, just 'yes' and 'no'.
-            # Number 3: I can do this also, but maybe a little 'view cli1grln20001rvwuslj4wo74' command that pulls up the whole
-            #           report? But maybe 'handle cli1grln20001rvwuslj4wo74' should also start by pulling up the whole report. I'm
-            #           thinking if we decompose it, then 'handle' can just call 'view' and then start asking questions of the mods.
-
-            # Okay cool! And we can turn this in a little late bc it's a made-up deadline for our own group to make the video.
-            # I'll also come help work in the morning.
-
-            # *** NEEDS TO HANDLE BANNING USERS AND ADDING THEM TO THE BANNED LIST (self.banned_users) ***
-            # self.banned_users.add(message.author.id)
-
-            # Handle starting a new moderation session (if you type something like "handle cli1grln20001rvwuslj4wo74")
-            if self.moderating == None and message.content.startswith(Moderate.START_KEYWORD):
-                self.moderating = Moderate(self)
-
-            # Let the moderate class handle this message; forward all the messages it returns to us
-            
-
-            # If the moderate class returned a string, convert it to a list to make it easier
-            if isinstance(responses, str):
-                responses = [responses]
-
-            for r in responses:
-                sent_message = await message.channel.send(r)
-            
-            # If the moderate session is complete or cancelled, remove it
-            if self.moderating.moderation_complete():
-                self.moderating = None
-            """
 
     async def handle_channel_message_edit(
         self, before: Union[discord.Message, None], after: discord.Message
