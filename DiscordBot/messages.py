@@ -138,3 +138,34 @@ class ReportDetailsMessage:
         "Here is a summary of your report. Please type `yes` or `no` to confirm that"
         " you would like to submit this report."
     )
+
+
+class ModerateMessage:
+    IS_SEXTORTION_VIOLATION = (
+        "Does this message fall into the category of non-consenual intimate imagery or"
+        " sextortion as outlined in our community guidelines?"
+    )
+    BANNED_USER = "`{author}` has been banned."
+    ADDITIONAL_DATA_COLLECTION = "Here are previous reports filed against this user"
+    HIGHER_LEVEL_COMPLETE = (
+        "After reviewing these reports, please type `yes` or `no` to confirm that you"
+        " would like to transfer this report to a higher-level moderator that can take"
+        " further action."
+    )
+
+    ADVERSARIAL_REPORTING = "Here are previous reports filed by this user"
+    AWAITING_ADVERSARIAL_REPORTING = (
+        "After reviewing these reports, please type `yes` or `no` to confirm that this"
+        " user is participating in adversarial reporting."
+    )
+
+    TEMP_BANNED_USER = "`{author}` has been temporarily banned for {day} day(s)."
+    ADVERSARIAL_REPORTING_YES_COMPLETE = (
+        "Thank you for reviewing this report. This activity and associated reports will"
+        " be forwarded to another team for further investigation."
+    )
+
+    ADVERSARIAL_REPORTING_NO_COMPLETE = (
+        "Thank you for reviewing this report. No further action is required on your"
+        " part."
+    )
