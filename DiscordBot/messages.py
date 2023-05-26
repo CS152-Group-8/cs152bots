@@ -37,9 +37,14 @@ class ReportStartMessage:
         "Please copy paste the link to the message you want to report.\nYou can obtain"
         " this link by right-clicking the message and clicking `Copy Message Link`."
     )
+    MODERATE_REQUEST = "Please type the report id of the report you want to handle."
     INVALID_LINK = (
         "I'm sorry, I couldn't read that link. Please try again or type `cancel` to"
         " cancel."
+    )
+    INVALID_REPORTID = (
+        "I'm sorry there is no open report associated with that report id. Please try"
+        " again or type `cancel` to cancel."
     )
     NOT_IN_GUILD = (
         "I cannot accept reports of messages from guilds that I'm not in. Please have"
@@ -62,6 +67,10 @@ class ReportStartMessage:
         " attachment(s).*\n{attachments}\n\nIs this the message you want to report?"
         " Please type `yes` or `no`."
     )
+    REPORT_IDENTIFIED = (
+        "I found this report:\n```{report_id}: {content}```\nIs"
+        " this the report you want to handle? Please type `yes` or `no`."
+    )
 
 
 class UserDetailsMessage:
@@ -76,6 +85,9 @@ class ReportDetailsMessage:
         "Please select the reason for reporting this message. React to this message"
         " with the corresponding emoji.\n1️⃣ - Harassment or offensive content \n2️⃣ - Spam"
         " \n3️⃣ - Immediate danger\n4️⃣ - Other"
+    )
+    MODERATOR_ABUSE_TYPE = (
+        "Is this message a sextortion violation? Please type `yes` or `no`."
     )
     ABUSE_TYPE = (
         "What type of abuse are you reporting? React to this message with the"
