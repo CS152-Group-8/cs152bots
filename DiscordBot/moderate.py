@@ -14,6 +14,7 @@ class State(Enum):
     AWAITING_SEXTORTION_VIOLATION = auto()
     AWAITING_ADDITIONAL_DATA_COLLECTION_CONFIRM = auto()
 
+    AWAITING_ADVERSARIAL_REPORTING = auto()
     MODERATE_COMPLETE = auto()
 
 
@@ -67,7 +68,7 @@ class Moderate:
         if self.state == State.MESSAGE_IDENTIFIED:
             if message.content.lower() in self.YES_KEYWORDS:
                 self.state = State.AWAITING_SEXTORTION_VIOLATION
-                await message.channel.send(self.handling_report.summary)
+                await message.channel.send(self.handling_report.moderator_summary)
                 return ModerateMessage.IS_SEXTORTION_VIOLATION
             elif message.content.lower() in self.NO_KEYWORDS:
                 self.state = State.AWAITING_MESSAGE
@@ -84,7 +85,8 @@ class Moderate:
                 other_reports = [
                     report.id
                     for report in self.client.open_reports
-                    if report.id == offender_id
+                    if report.message.author.id == offender_id
+                    and report.id != self.handling_report.id
                 ]
 
                 response = [
@@ -96,7 +98,7 @@ class Moderate:
                 if other_reports:
                     response.append(
                         ModerateMessage.ADDITIONAL_DATA_COLLECTION.format(
-                            reports="\n" + "\n".join(other_reports)
+                            reports="\n" + "\n".join([" - " + r for r in other_reports])
                         )
                     )
                 else:
@@ -106,7 +108,22 @@ class Moderate:
 
                 return response
             elif message.content.lower() in self.NO_KEYWORDS:
-                pass
+                other_reports = [
+                    report.id
+                    for report in self.client.open_reports
+                    if report.reporter.id == self.handling_report.reporter.id
+                    and report.id != self.handling_report.id
+                ]
+
+                if other_reports:
+                    self.state = State.AWAITING_ADVERSARIAL_REPORTING
+                    return ModerateMessage.ADVERSARIAL_REPORTING.format(
+                        reports="\n" + "\n".join([" - " + r for r in other_reports])
+                    )
+
+                self.state = State.MODERATE_COMPLETE
+                self.client.open_reports.remove(self.handling_report)
+                return ModerateMessage.ADVERSARIAL_REPORTING_NO_COMPLETE
             else:
                 return GenericMessage.INVALID_YES_NO
 
@@ -121,53 +138,25 @@ class Moderate:
             else:
                 return GenericMessage.INVALID_YES_NO
 
-        # delete report from
+        if self.state == State.AWAITING_ADVERSARIAL_REPORTING:
+            if message.content.lower() in self.YES_KEYWORDS:
+                self.state = State.MODERATE_COMPLETE
+                self.client.open_reports.remove(self.handling_report)
+                self.client.banned_users.add(self.handling_report.reporter.id)
+                return [
+                    ModerateMessage.TEMP_BANNED_USER.format(
+                        author=self.handling_report.reporter.name, days=7
+                    ),
+                    ModerateMessage.YES_ESCALATE,
+                ]
+            elif message.content.lower() in self.NO_KEYWORDS:
+                self.state = State.MODERATE_COMPLETE
+                self.client.open_reports.remove(self.handling_report)
+                return ModerateMessage.ADVERSARIAL_REPORTING_NO_COMPLETE
+            else:
+                return GenericMessage.INVALID_YES_NO
 
-        # if self.state == State.AWAITING_ABUSE_TYPE:
-        #     if message.content.lower() in self.YES_KEYWORDS:
-        #         self.data.abuse_type = "Sexually explicit harassment"
-        #         response = []
-        #         self.data.blocked_user = True
-        #         response.append(
-        #             ReportDetailsMessage.BLOCKED.format(
-        #                 author=self.handling_report.message.author.name
-        #             )
-        #         )
-        #         self.state = State.AWAITING_CONFIRMATION
-        #         response.extend(
-        #             [self.data.user_summary, ReportDetailsMessage.CONFIRMATION]
-        #         )
-        #         return response
-
-        #     elif message.content.lower() in self.NO_KEYWORDS:
-        #         # investigate for adversarial reporting
-        #         self.state = State.MODERATE_COMPLETE
-        #         self.state = State.AWAITING_CONFIRMATION
-        #         response.extend(
-        #             [self.data.user_summary, ReportDetailsMessage.CONFIRMATION]
-        #         )
-        #         return response
-
-        #     else:
-        #         return GenericMessage.INVALID_YES_NO
-
-        # if self.state == State.AWAITING_CONFIRMATION:
-        #     if message.content.lower() in self.YES_KEYWORDS:
-        #         self.data.MODERATE_COMPLETEd_at = datetime.utcnow()
-
-        #         # Send the report to the mod channel
-        #         await self.client.send_to_mod_channels(self.data.moderator_summary)
-        #         self.client.open_reports.append(self.data)
-
-        #         self.state = State.MODERATE_COMPLETE
-        #         return GenericMessage.MODERATE_COMPLETE
-        #     elif message.content.lower() in self.NO_KEYWORDS:
-        #         # TODO: what do we do if they say no...?
-        #         return "****TODO****???" + GenericMessage.CANCELED
-        #     else:
-        #         return GenericMessage.INVALID_YES_NO
-
-        # return []
+        return []
 
     def moderation_complete(self):
         return self.state == State.MODERATE_COMPLETE

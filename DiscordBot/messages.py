@@ -158,13 +158,13 @@ class ModerateMessage:
     )
     BANNED_USER = "`{author}` has been banned."
     ADDITIONAL_DATA_COLLECTION_NO_REPORTS = (
-        "There are no previous reports filed against this user. Please type `yes` or"
+        "There are no other reports filed against this user. Please type `yes` or"
         " `no` to confirm that you would like to transfer this report to a higher-level"
         " moderator that may take further action."
     )
 
     ADDITIONAL_DATA_COLLECTION = (
-        "Here are previous reports filed against this user:\n{reports}\nAfter reviewing"
+        "Here are other reports filed against this user:{reports}\nAfter reviewing"
         " these reports, please type `yes` or `no` to confirm that you would like to"
         " transfer this report to a higher-level moderator that may take further"
         " action."
@@ -178,13 +178,13 @@ class ModerateMessage:
         " be sent to another team for further investigation."
     )
 
-    ADVERSARIAL_REPORTING = "Here are previous reports filed by this user:\n{reports}"
-    AWAITING_ADVERSARIAL_REPORTING = (
-        "After reviewing these reports, please type `yes` or `no` to confirm that this"
-        " user is participating in adversarial reporting."
+    ADVERSARIAL_REPORTING = (
+        "Here are other reports filed by this user:{reports}\nAfter reviewing"
+        " these reports, please type `yes` or `no` to confirm that this user is"
+        " participating in adversarial reporting."
     )
 
-    TEMP_BANNED_USER = "`{author}` has been temporarily banned for {day} day(s)."
+    TEMP_BANNED_USER = "`{author}` has been temporarily banned for {days} day(s)."
 
     ADVERSARIAL_REPORTING_NO_COMPLETE = (
         "Thank you for reviewing this report. No further action is required on your"

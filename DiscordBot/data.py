@@ -63,7 +63,7 @@ class ReportData:
         risk = sum(
             [
                 self.multiple_requests * 2 if self.multiple_requests else 0,
-                self.complied_with_requests,
+                self.complied_with_requests if self.complied_with_requests else 0,
                 self.minor_participation * 3 if self.minor_participation else 0,
                 self.encourage_self_harm * 3 if self.encourage_self_harm else 0,
             ]

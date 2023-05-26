@@ -261,15 +261,18 @@ class ModBot(discord.Client):
         """
         if len(self.open_reports) == 0:
             return ["No open reports right now!"]
-        response = [
-            f"`{'Report ID':30} {'Priority':10} {'Reported by':20} {'Reported against':25}`"
-        ]
+
+        response = (
+            f"```{'Report ID':30} {'Priority':10} {'Reported by':20} {'Reported against':25}"
+        )
+
         self.open_reports.sort(key=lambda x: x.raw_priority, reverse=True)
         for r in self.open_reports:
-            response.append(
-                f"`{str(r.id):30} {str(r.raw_priority):10} {str(r.reporter.name):20} {str(r.message.author.name):25}`"
+            response += (
+                f"\n{str(r.id):30} {str(r.raw_priority):10} {str(r.reporter.name):20} {str(r.message.author.name):25}"
             )
-        return response
+
+        return [response + "```"]
 
     def clean_text(self, text: str) -> str:
         """
