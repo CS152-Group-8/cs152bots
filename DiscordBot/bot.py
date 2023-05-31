@@ -264,12 +264,14 @@ class ModBot(discord.Client):
         return unidecode(text)
 
     async def evaluate_message(self, message):
-        is_sextortion = is_message_sextortion(message.content)
-        is_encouraging_self_harm = is_message_encouraging_self_harm(message.content)
-        # minor_participation = images_include_minors(message.attachments)
-        # nudity_detected = images_include_nudity(message.attachments)
+        results = await asyncio.gather(
+            is_message_sextortion(message.content),
+            is_message_encouraging_self_harm(message.content),
+            images_include_minors([a.url for a in message.attachments]),
+            # self.images_include_nudity([a.url for a in message.attachments),
+        )
 
-        minor_participation = False
+        is_sextortion, is_encouraging_self_harm, minor_participation = results
         nudity_detected = False
 
         if is_sextortion or (minor_participation and nudity_detected):
