@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import cuid
+import discord
 
 
 class ReportData:
@@ -133,6 +134,116 @@ class ReportData:
         Generate a summary of the report for the user.
         """
         return ">>> " + self.summary
+
+    def _human_readable(self, value: str) -> str:
+        """
+        Convert a boolean values and None to human readable strings.
+        """
+        if isinstance(value, bool):
+            return "Yes" if value else "No"
+        if value is None:
+            return "N/A"
+        return value
+
+
+class AutoReportData:
+    SUMMARY = """## Message:
+- Author: {offender}
+- Content: {content}
+- Attachments: {attachments}
+## Report Details:
+- Contains Sextortion: {sextortion}
+- Contains Nudity: {nudity}
+- Minor Participation: {minor_participation}
+- Includes Self-harm: {encourage_self_harm}
+"""
+
+    MODERATOR_NOTES = """## Moderator Notes:
+- Report ID: {id}
+- Priority: {priority}
+- Created at: {date} (UTC)
+"""
+
+    def __init__(
+        self,
+        message: discord.Message,
+        *,
+        is_sextortion: bool,
+        encourage_self_harm: bool,
+        minor_participation: bool,
+        nudity: bool,
+    ):
+        self.id = cuid.cuid()
+        self.report_started_at = datetime.utcnow()
+        self.message = message  # when generating report -> get the message link
+        self.attachments = (
+            "\n" + "\n".join([" - " + str(a) + "." for a in message.attachments])
+            if message.attachments
+            else None
+        )
+
+        # if true -> automatically generate report
+        self.is_sextortion = is_sextortion  # text classifier
+
+        # if both of these true -> automatically generate report (CSAM)
+        self.minor_participation = (
+            minor_participation  # image classifer (cats vs. kittens)
+        )
+        self.nudity = nudity  # image classifer (cats vs. clothed cats)
+
+        self.encourage_self_harm = encourage_self_harm  # text classifier
+
+    @property
+    def raw_priority(self) -> int:
+        """
+        Naive priority calculation based on certain fields.
+        """
+        risk = sum(
+            [
+                self.minor_participation * 3 if self.minor_participation else 0,
+                self.encourage_self_harm * 3 if self.encourage_self_harm else 0,
+            ]
+        )
+
+        return risk
+
+    @property
+    def priority(self) -> str:
+        """
+        Naive priority calculation based on certain fields.
+        """
+        if self.raw_priority <= 1:
+            return "Low"
+
+        if self.raw_priority == 2:
+            return "Medium"
+
+        return "High"
+
+    @property
+    def moderator_summary(self) -> str:
+        """
+        Generate a summary of the report for the moderator.
+        """
+        return (
+            "New report automatically generated. Please review the following report and"
+            " take necessary action.\n"
+            + ">>> "
+            + AutoReportData.MODERATOR_NOTES.format(
+                id=self.id,
+                priority=self.priority,
+                date=self.report_started_at,
+            )
+            + AutoReportData.SUMMARY.format(
+                offender=self.message.author.name,
+                content=self.message.content,
+                attachments=self._human_readable(self.attachments),
+                sextortion=self._human_readable(self.is_sextortion),
+                nudity=self._human_readable(self.nudity),
+                minor_participation=self._human_readable(self.minor_participation),
+                encourage_self_harm=self._human_readable(self.encourage_self_harm),
+            )
+        )
 
     def _human_readable(self, value: str) -> str:
         """

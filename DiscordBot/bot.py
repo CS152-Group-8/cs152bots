@@ -4,10 +4,16 @@ import json
 import logging
 import os
 import re
-from typing import Union
 
 import discord
 import emoji
+from classifiers import (
+    images_include_minors,
+    images_include_nudity,
+    is_message_encouraging_self_harm,
+    is_message_sextortion,
+)
+from data import AutoReportData
 from messages import GenericMessage, ModerateMessage
 from moderate import Moderate
 from report import Report
@@ -176,16 +182,11 @@ class ModBot(discord.Client):
     async def handle_channel_message(self, message):
         # Handle messages sent in the "group-#" channel
         if message.channel.name == f"group-{self.group_num}":
-            pass
-            # TODO: uncomment for milestone 3
-            # # Forward the message to the mod channel
-            # mod_channel = self.mod_channels[message.guild.id]
-            # await mod_channel.send(
-            #     f"Forwarded message:\n{message.author.name}:"
-            #     f" {self.clean_text(message.content)}"
-            # )
-            # scores = self.eval_text(message.content)
-            # await mod_channel.send(self.code_format(scores))
+            # Forward automatically generated reports to the mod channel
+            mod_channel = self.mod_channels[message.guild.id]
+            responses = await self.evaluate_message(message)
+            for r in responses:
+                sent_message = await mod_channel.send(r)
 
         # Handle messages sent in the "group-#-mod" channel
         # Very similar to the handle_dm() function for handling reports
@@ -234,27 +235,7 @@ class ModBot(discord.Client):
             if self.moderating and self.moderating.moderation_complete():
                 self.moderating = None
 
-    async def handle_channel_message_edit(
-        self, before: Union[discord.Message, None], after: discord.Message
-    ):
-        # Only handle messages sent in the "group-#" channel
-        if not after.channel.name == f"group-{self.group_num}":
-            return
-
-        # TODO: uncomment for milestone 3
-        # Forward the message to the mod channel
-        # mod_channel = self.mod_channels[after.guild.id]
-        # await mod_channel.send(
-        #     self.clean_text(
-        #         f"Forwarded edited message by {after.author.name}:\nBefore:"
-        #         f" {self.clean_text(before.content) if before else 'message not cached'}\nAfter:"
-        #         f" {self.clean_text(after.content)}"
-        #     )
-        # )
-        # scores = self.eval_text(after.content)
-        # await mod_channel.send(self.code_format(scores))
-
-    def list_all_reports(self) -> [str]:
+    def list_all_reports(self):
         """
         Returns a list of all reports, but formatted as strings.
         Includes a header.
@@ -268,8 +249,9 @@ class ModBot(discord.Client):
 
         self.open_reports.sort(key=lambda x: x.raw_priority, reverse=True)
         for r in self.open_reports:
+            reporter = r.reporter.name if hasattr(r, "reporter") else "system"
             response += (
-                f"\n{str(r.id):30} {str(r.raw_priority):10} {str(r.reporter.name):20} {str(r.message.author.name):25}"
+                f"\n{str(r.id):30} {str(r.raw_priority):10} {str(reporter):20} {str(r.message.author.name):25}"
             )
 
         return [response + "```"]
@@ -279,15 +261,30 @@ class ModBot(discord.Client):
         Removes special formatting from a text string so that it can be sent in a
         human-readable format to the mod channel.
         """
-        # TODO: maybe also include the raw message in the mod channel?
         return unidecode(text)
 
-    def eval_text(self, message):
-        """'
-        TODO: Once you know how you want to evaluate messages in your channel,
-        insert your code here! This will primarily be used in Milestone 3.
-        """
-        return message
+    async def evaluate_message(self, message):
+        is_sextortion = is_message_sextortion(message.content)
+        is_encouraging_self_harm = is_message_encouraging_self_harm(message.content)
+        # minor_participation = images_include_minors(message.attachments)
+        # nudity_detected = images_include_nudity(message.attachments)
+
+        minor_participation = False
+        nudity_detected = False
+
+        if is_sextortion or (minor_participation and nudity_detected):
+            report = AutoReportData(
+                message,
+                is_sextortion=is_sextortion,
+                encourage_self_harm=is_encouraging_self_harm,
+                minor_participation=minor_participation,
+                nudity=nudity_detected,
+            )
+            self.open_reports.append(report)
+            return [report.moderator_summary]
+
+        return []
+        # TODO: provide warning if nudity detected
 
     def code_format(self, text):
         """'
