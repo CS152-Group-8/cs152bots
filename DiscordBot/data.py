@@ -9,6 +9,7 @@ class ReportData:
 - Author: {offender}
 - Content: {content}
 - Attachments: {attachments}
+- Link to Message: {link}
 ## Report Details:
 - Reason: {reason}
 - Abuse Type: {abuse_type}
@@ -94,6 +95,7 @@ class ReportData:
             offender=self.message.author.name,
             content=self.message.content,
             attachments=self._human_readable(self.attachments),
+            link=self._human_readable(self.message.jump_url),
             reason=self.reason,
             abuse_type=self.abuse_type,
             abuse_description=self.abuse_description,
@@ -151,6 +153,7 @@ class AutoReportData:
 - Author: {offender}
 - Content: {content}
 - Attachments: {attachments}
+- Link to Message: {link}
 ## Report Details:
 - Contains Sextortion: {sextortion}
 - Contains Nudity: {nudity}
@@ -181,6 +184,7 @@ class AutoReportData:
             if message.attachments
             else None
         )
+        self.link = message.jump_url
 
         # if true -> automatically generate report
         self.is_sextortion = is_sextortion  # text classifier
@@ -238,6 +242,7 @@ class AutoReportData:
                 offender=self.message.author.name,
                 content=self.message.content,
                 attachments=self._human_readable(self.attachments),
+                link=self._human_readable(self.link),
                 sextortion=self._human_readable(self.is_sextortion),
                 nudity=self._human_readable(self.nudity),
                 minor_participation=self._human_readable(self.minor_participation),
