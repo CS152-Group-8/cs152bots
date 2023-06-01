@@ -111,7 +111,7 @@ class Moderate:
                 other_reports = [
                     report.id
                     for report in self.client.open_reports
-                    if report.reporter.id == self.handling_report.reporter.id
+                    if hasattr(report, "reporter") and report.reporter.id == self.handling_report.reporter.id
                     and report.id != self.handling_report.id
                 ]
 
