@@ -51,7 +51,7 @@ class ModBot(discord.Client):
         self.open_reports = []  # List of all open reports
         self.banned_users = set()  # Permanently kicked user ids from moderator flow
         self.awaiting_contains_nudity = set()  # User ids awaiting nudity confirmation
-        self.awaiting_contains_nudity_report = None # Report 
+        self.awaiting_contains_nudity_report = {} # Map from user IDs to automated report
 
     async def on_ready(self):
         print(f"{self.user.name} has connected to Discord! It is these guilds:")
@@ -184,18 +184,19 @@ class ModBot(discord.Client):
     async def handle_nudity_confirmation(self, message):
         # Handle a nudity confirmation message
         if message.content.lower() in ["yes", "y"]:
-            self.awaiting_contains_nudity.remove(message.author.id)
             await message.channel.send("Message sent.")
-            self.open_reports.append(self.awaiting_contains_nudity_report)
-            responses = [self.awaiting_contains_nudity_report.moderator_summary]
+            
+            self.open_reports.append(self.awaiting_contains_nudity_report[message.author.id])
+            responses = [self.awaiting_contains_nudity_report[message.author.id].moderator_summary]
             mod_channel = self.mod_channels[message.guild.id]
             for r in responses:
                 sent_message = await mod_channel.send(r)
-            self.awaiting_contains_nudity_report = None
-        elif message.content.lower() in ["no", "n"]:
+            self.awaiting_contains_nudity_report.pop(message.author.id)
             self.awaiting_contains_nudity.remove(message.author.id)
+        elif message.content.lower() in ["no", "n"]:
             await message.channel.send("Message canceled.")
-            self.awaiting_contains_nudity_report = None
+            self.awaiting_contains_nudity_report.pop(message.author.id)
+            self.awaiting_contains_nudity.remove(message.author.id)
         else:
             await message.channel.send(
                 "Please respond with `yes` or `no` to confirm or cancel the message."
@@ -209,7 +210,8 @@ class ModBot(discord.Client):
                 return
 
             # Forward automatically generated reports to the mod channel
-            responses, nudity_detected = await self.evaluate_message(message)
+            report, nudity_detected = await self.evaluate_message(message)
+            self.awaiting_contains_nudity_report[message.author.id] = report
 
             if nudity_detected:
                 await message.channel.send(
@@ -316,8 +318,7 @@ class ModBot(discord.Client):
                 minor_participation=minor_participation,
                 nudity=nudity_detected,
             )
-            self.awaiting_contains_nudity_report = report
-            return [report.moderator_summary], nudity_detected
+            return report, nudity_detected
 
         return [], nudity_detected
 
