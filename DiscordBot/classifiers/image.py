@@ -45,7 +45,6 @@ def process_images(images: List[bytes]) -> tf.Tensor:
         try:
             image = tf.io.decode_image(image, channels=3)
         except tf.errors.InvalidArgumentError:
-            print("Failed to decode image")
             continue
         image = tf.image.resize(image, [224, 224])
         image = tf.keras.applications.mobilenet_v2.preprocess_input(image)
@@ -61,7 +60,8 @@ async def images_include_minors(images: List[str]) -> bool:
     image_data = await fetch_images(images)
     batch = process_images(image_data)
 
-    # check if tensor is empty
+    if len(batch) == 0:
+        return False
 
     model = model_dict["minor_detection"]
     predictions = (model.predict(batch, verbose=0) > 0.5).flatten()
@@ -76,7 +76,8 @@ async def images_include_nudity(images: List[str]) -> bool:
     image_data = await fetch_images(images)
     batch = process_images(image_data)
 
-    # check if tensor is empty
+    if len(batch) == 0:
+        return False
 
     model = model_dict["nudity_detection"]
     predictions = (model.predict(batch, verbose=0) <= 0.5).flatten()
