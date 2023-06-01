@@ -47,7 +47,7 @@ async def is_message_sextortion(message: str):
                     {"role": "assistant", "content": "Non-sextortion"},
                     {"role": "user", "content": message},
                 ],
-                timeout=20,
+                request_timeout=5,
             )
             return response["choices"][0]["message"]["content"].lower() == "sextortion"
         else:
@@ -79,7 +79,7 @@ async def is_message_encouraging_self_harm(message: str):
                     {"role": "assistant", "content": "False"},
                     {"role": "user", "content": message},
                 ],
-                timeout=20,
+                request_timeout=5,
             )
             return response["choices"][0]["message"]["content"].lower() == "true"
         else:
