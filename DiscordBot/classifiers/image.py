@@ -9,9 +9,9 @@ model_dict = {
     "minor_detection": tf.keras.models.load_model(
         os.path.join(os.path.dirname(__file__), "models/minor_detection/model.hdf5")
     ),
-    # "nudity_detection": tf.keras.models.load_model(
-    #     os.path.join(os.path.dirname(__file__), "models/nudity_detection/model.hdf5")
-    # ),
+    "nudity_detection": tf.keras.models.load_model(
+        os.path.join(os.path.dirname(__file__), "models/nudity_detection/model.hdf5")
+    ),
 }
 
 
@@ -62,5 +62,14 @@ async def images_include_minors(images: List[str]) -> bool:
     return any(predictions)
 
 
-def images_include_nudity(images: List[str]) -> bool:
-    pass
+async def images_include_nudity(images: List[str]) -> bool:
+    """
+    Run a list of Discord image URLs through our nudity detection model and return
+    whether or not any of them are predicted to contain nudity.
+    """
+    image_data = await fetch_images(images)
+    batch = process_images(image_data)
+
+    model = model_dict["nudity_detection"]
+    predictions = (model.predict(batch, verbose=0) <= 0.5).flatten()
+    return any(predictions)
