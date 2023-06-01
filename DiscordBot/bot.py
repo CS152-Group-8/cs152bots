@@ -50,8 +50,9 @@ class ModBot(discord.Client):
         )
         self.open_reports = []  # List of all open reports
         self.banned_users = set()  # Permanently kicked user ids from moderator flow
-        self.awaiting_contains_nudity = set()  # User ids awaiting nudity confirmation
-        self.awaiting_contains_nudity_report = {} # Map from user IDs to automated report
+        self.awaiting_contains_nudity_report = (
+            {}
+        )  # Map from user IDs to automated report
 
     async def on_ready(self):
         print(f"{self.user.name} has connected to Discord! It is these guilds:")
@@ -185,18 +186,16 @@ class ModBot(discord.Client):
         # Handle a nudity confirmation message
         if message.content.lower() in ["yes", "y"]:
             await message.channel.send("Message sent.")
-            
-            self.open_reports.append(self.awaiting_contains_nudity_report[message.author.id])
-            responses = [self.awaiting_contains_nudity_report[message.author.id].moderator_summary]
-            mod_channel = self.mod_channels[message.guild.id]
-            for r in responses:
-                sent_message = await mod_channel.send(r)
+
+            report = self.awaiting_contains_nudity_report[message.author.id]
+            if report:
+                self.open_reports.append(report)
+                await self.send_to_mod_channels(report.moderator_summary)
+
             self.awaiting_contains_nudity_report.pop(message.author.id)
-            self.awaiting_contains_nudity.remove(message.author.id)
         elif message.content.lower() in ["no", "n"]:
             await message.channel.send("Message canceled.")
             self.awaiting_contains_nudity_report.pop(message.author.id)
-            self.awaiting_contains_nudity.remove(message.author.id)
         else:
             await message.channel.send(
                 "Please respond with `yes` or `no` to confirm or cancel the message."
@@ -205,20 +204,21 @@ class ModBot(discord.Client):
     async def handle_channel_message(self, message):
         # Handle messages sent in the "group-#" channel
         if message.channel.name == f"group-{self.group_num}":
-            if message.author.id in self.awaiting_contains_nudity:
+            if message.author.id in self.awaiting_contains_nudity_report:
                 await self.handle_nudity_confirmation(message)
                 return
 
             # Forward automatically generated reports to the mod channel
             report, nudity_detected = await self.evaluate_message(message)
-            self.awaiting_contains_nudity_report[message.author.id] = report
-
             if nudity_detected:
+                self.awaiting_contains_nudity_report[message.author.id] = report
                 await message.channel.send(
                     "This message may contain nudity. Are you sure you want to send it?"
                     " Please respond with `yes` or `no`."
                 )
-                self.awaiting_contains_nudity.add(message.author.id)
+            elif report:
+                self.open_reports.append(report)
+                await self.send_to_mod_channels(report.moderator_summary)
 
         # Handle messages sent in the "group-#-mod" channel
         # Very similar to the handle_dm() function for handling reports
@@ -320,7 +320,7 @@ class ModBot(discord.Client):
             )
             return report, nudity_detected
 
-        return [], nudity_detected
+        return None, nudity_detected
 
     def code_format(self, text):
         """'
