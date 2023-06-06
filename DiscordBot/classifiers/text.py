@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import openai
@@ -52,8 +53,8 @@ async def is_message_sextortion(message: str):
             return response["choices"][0]["message"]["content"].lower() == "sextortion"
         else:
             return None
-    except openai.OpenAIError:
-        return None
+    except Exception:
+        logging.exception("Failed to complete OpenAI query.")
 
 
 async def is_message_encouraging_self_harm(message: str):
@@ -84,5 +85,5 @@ async def is_message_encouraging_self_harm(message: str):
             return response["choices"][0]["message"]["content"].lower() == "true"
         else:
             return None
-    except openai.OpenAIError:
-        return None
+    except Exception:
+        logging.exception("Failed to complete OpenAI query.")
